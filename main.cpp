@@ -1,5 +1,6 @@
-#include <GL/glew.h>
+#include <glad/glad.h>
 #include <GLFW/glfw3.h>
+
 
 #include <iostream>
 #include <ctime>
@@ -31,9 +32,27 @@ int createWindow()
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 
     const GLFWvidmode* videomode = glfwGetVideoMode(glfwGetPrimaryMonitor());
-    ResourceManager::WINDOW_X = videomode->width;
-    ResourceManager::WINDOW_Y = videomode->height;
-    ResourceManager::mainWindow = glfwCreateWindow(ResourceManager::WINDOW_X, ResourceManager::WINDOW_Y, "Test Window", glfwGetPrimaryMonitor(), NULL);
+
+    // Create a borderless window sized to the desktop when starting in fullscreen.
+    if (isFullscreen)
+    {
+        glfwWindowHint(GLFW_DECORATED, GLFW_FALSE);
+        ResourceManager::WINDOW_X = videomode->width;
+        ResourceManager::WINDOW_Y = videomode->height;
+        ResourceManager::mainWindow = glfwCreateWindow(ResourceManager::WINDOW_X, ResourceManager::WINDOW_Y, "Test Window", NULL, NULL);
+        if (ResourceManager::mainWindow)
+            glfwSetWindowPos(ResourceManager::mainWindow, 0, 0);
+    }
+    else
+    {
+        // Windowed mode
+        glfwWindowHint(GLFW_DECORATED, GLFW_TRUE);
+        ResourceManager::WINDOW_X = windowedWidth;
+        ResourceManager::WINDOW_Y = windowedHeight;
+        ResourceManager::mainWindow = glfwCreateWindow(ResourceManager::WINDOW_X, ResourceManager::WINDOW_Y, "Test Window", NULL, NULL);
+        if (ResourceManager::mainWindow)
+            glfwSetWindowPos(ResourceManager::mainWindow, windowedPosX, windowedPosY);
+    }
     if (!ResourceManager::mainWindow)
     {
         std::cout << "GLFW window creation failed" << std::endl;
@@ -41,19 +60,19 @@ int createWindow()
         return 1;
     }
     
-    glfwGetFramebufferSize(ResourceManager::mainWindow, &bufferWidth, &bufferHeight);
     glfwSetInputMode(ResourceManager::mainWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    
     glfwMakeContextCurrent(ResourceManager::mainWindow);
+    glfwGetFramebufferSize(ResourceManager::mainWindow, &bufferWidth, &bufferHeight);
     glfwSwapInterval(1);
-    glewExperimental = GL_TRUE;
-
-    if (glewInit() != GLEW_OK)
-    {
-        std::cout << "GLEW initialisation failed" << std::endl;
-        glfwDestroyWindow(ResourceManager::mainWindow);
-        glfwTerminate();
-        return 1;
+   
+    // load OpenGL function pointers with glad
+    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+        throw std::runtime_error("Failed to initialize glad.");
+    } else {
+        // No action needed
     }
+    
     glViewport(0, 0, bufferWidth, bufferHeight);
     
     return 0;
@@ -68,22 +87,24 @@ void toggleFullscreen()
         // Save current windowed position and size
         glfwGetWindowPos(ResourceManager::mainWindow, &windowedPosX, &windowedPosY);
         glfwGetWindowSize(ResourceManager::mainWindow, &windowedWidth, &windowedHeight);
-        
-        // Switch to fullscreen
+
+        // Borderless fullscreen: remove decorations and resize to monitor size
         const GLFWvidmode* videomode = glfwGetVideoMode(glfwGetPrimaryMonitor());
-        glfwSetWindowMonitor(ResourceManager::mainWindow, glfwGetPrimaryMonitor(), 
-                            0, 0, videomode->width, videomode->height, GLFW_DONT_CARE);
         ResourceManager::WINDOW_X = videomode->width;
         ResourceManager::WINDOW_Y = videomode->height;
+        glfwSetWindowAttrib(ResourceManager::mainWindow, GLFW_DECORATED, GLFW_FALSE);
+        glfwSetWindowSize(ResourceManager::mainWindow, ResourceManager::WINDOW_X, ResourceManager::WINDOW_Y);
+        glfwSetWindowPos(ResourceManager::mainWindow, 0, 0);
         glfwSetInputMode(ResourceManager::mainWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     }
     else
     {
-        // Switch to windowed mode
-        glfwSetWindowMonitor(ResourceManager::mainWindow, nullptr,
-                            windowedPosX, windowedPosY, windowedWidth, windowedHeight, GLFW_DONT_CARE);
+        // Restore windowed mode: re-enable decorations and restore position/size
         ResourceManager::WINDOW_X = windowedWidth;
         ResourceManager::WINDOW_Y = windowedHeight;
+        glfwSetWindowAttrib(ResourceManager::mainWindow, GLFW_DECORATED, GLFW_TRUE);
+        glfwSetWindowSize(ResourceManager::mainWindow, windowedWidth, windowedHeight);
+        glfwSetWindowPos(ResourceManager::mainWindow, windowedPosX, windowedPosY);
         glfwSetInputMode(ResourceManager::mainWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
     }
     
