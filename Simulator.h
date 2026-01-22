@@ -16,6 +16,7 @@ public:
 	static void swap();
 	static void draw();
 	static void setAutomatonType(int type);
+	static void resize();
 
 	enum AUTOMATON_TYPES
 	{

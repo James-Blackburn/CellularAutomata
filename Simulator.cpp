@@ -307,3 +307,34 @@ void Simulator::mouseMove(GLFWwindow* window, double xpos, double ypos)
 
 	glfwSetCursorPos(ResourceManager::mainWindow, new_xpos, new_ypos);
 }
+
+void Simulator::resize()
+{
+	// Delete old textures and framebuffer
+	glDeleteTextures(1, &frontTexture);
+	glDeleteTextures(1, &backTexture);
+	
+	// Recreate textures with new dimensions
+	frontTexture = createTexture();
+	backTexture = createTexture();
+	
+	// Update fullscreen vertices with new dimensions
+	GLfloat fullscreenVertices[12] = {
+		0, 0, 0,
+		0, ResourceManager::WINDOW_Y, 0,
+		ResourceManager::WINDOW_X, 0, 0,
+		ResourceManager::WINDOW_X, ResourceManager::WINDOW_Y, 0,
+	};
+	
+	// Update vertex buffer
+	glBindBuffer(GL_ARRAY_BUFFER, fullscreenVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(fullscreenVertices), fullscreenVertices, GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, GL_NONE);
+	
+	// Update projection matrix
+	projection = glm::ortho(0.0f, (float)ResourceManager::WINDOW_X, 0.0f, (float)ResourceManager::WINDOW_Y, 0.1f, 1000.0f);
+	vp = projection * glm::lookAt(glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+	
+	// Populate new front texture with noise
+	populate(frontTexture);
+}
