@@ -100,7 +100,7 @@ void toggleFullscreen()
 
 void framebufferSizeCallback(GLFWwindow* window, int width, int height)
 {
-    if (!isFullscreen && width > 0 && height > 0)
+    if (width > 0 && height > 0)
     {
         ResourceManager::WINDOW_X = width;
         ResourceManager::WINDOW_Y = height;

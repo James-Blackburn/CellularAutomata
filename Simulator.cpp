@@ -198,7 +198,7 @@ void Simulator::populate(GLuint texture)
 	glUseProgram(ResourceManager::noiseShader.getID());
 	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
-		GL_TEXTURE_2D, frontTexture, 0);
+		GL_TEXTURE_2D, texture, 0);
 
 	glUniformMatrix4fv(uniformNoiseVPlocation, 1, GL_FALSE, glm::value_ptr(vp));
 
