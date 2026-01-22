@@ -1,6 +1,6 @@
 #pragma once
 
-#include <GL/glew.h>
+#include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -16,6 +16,7 @@ public:
 	static void swap();
 	static void draw();
 	static void setAutomatonType(int type);
+	static void resize();
 
 	enum AUTOMATON_TYPES
 	{
