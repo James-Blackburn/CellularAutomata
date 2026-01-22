@@ -22,12 +22,12 @@ Various types of 2d cellular automaton implemented in C++ and OpenGL
 - C++ compiler with C++11 support
 - OpenGL libraries
 - GLFW3
-- GLEW
 - GLM
+- GLAD (included in `external/glad/`)
 
 ### On Ubuntu/Debian:
 ```bash
-sudo apt install libglew-dev libglfw3-dev libglm-dev
+sudo apt install libglfw3-dev libglm-dev
 ```
 
 ### Compilation:
